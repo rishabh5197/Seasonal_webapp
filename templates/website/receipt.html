@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block title %}{{ site_name }} | Receipt{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="receipt-shell glass-card">
+      <div class="receipt-header">
+        <div>
+          <p class="eyebrow">Printable receipt</p>
+          <h1>Tax invoice and payment receipt</h1>
+        </div>
+        <button class="btn btn--ghost no-print" type="button" onclick="window.print()">Print receipt</button>
+      </div>
+
+      <div class="receipt-grid">
+        <article>
+          <h3>Customer</h3>
+          <p>{{ order.user.full_name }}</p>
+          <p>{{ order.user.email }}</p>
+          {% if order.shipping_address %}
+          <p>{{ order.shipping_address.recipient_name }}</p>
+          <p>{{ order.shipping_address.line_1 }}</p>
+          <p>{{ order.shipping_address.city }}, {{ order.shipping_address.state }} {{ order.shipping_address.postal_code }}</p>
+          {% endif %}
+        </article>
+        <article>
+          <h3>Order</h3>
+          <p>Order number: {{ order.order_number }}</p>
+          <p>Tracking number: {{ order.tracking_number }}</p>
+          <p>Purchased on: {{ order.placed_at|default:order.created_at }}</p>
+          <p>Status: {{ order.get_status_display }}</p>
+          <p>Settlement: {{ order.get_settlement_status_display }}</p>
+        </article>
+      </div>
+
+      <div class="receipt-table">
+        <div class="receipt-row receipt-row--head">
+          <span>Item purchased</span>
+          <span>Seller</span>
+          <span>Qty</span>
+          <span>Warranty till</span>
+          <span>Amount</span>
+        </div>
+        {% for row in receipt_items %}
+        <div class="receipt-row">
+          <span>{{ row.item.product_name }}</span>
+          <span>{{ row.item.product.owner.full_name }}</span>
+          <span>{{ row.item.quantity }}</span>
+          <span>{% if row.warranty_until %}{{ row.warranty_until }}{% else %}N/A{% endif %}</span>
+          <span>&#8377;{{ row.item.line_total }}</span>
+        </div>
+        {% if request.user.is_authenticated and request.user.id == order.user_id %}
+        <div class="receipt-actions">
+          <div class="glass-card receipt-action-card">
+            <h3>Review</h3>
+            {% if row.review %}
+              <p>Rating: {{ row.review.rating }}/5</p>
+              <p>{{ row.review.comment }}</p>
+              {% if row.review.images.all %}
+              <div class="review-photos">
+                {% for photo in row.review.images.all %}
+                <img src="{{ photo.image.url }}" alt="{{ photo.caption|default:row.item.product_name }}">
+                {% endfor %}
+              </div>
+              {% endif %}
+            {% elif row.can_review %}
+            <form method="post" action="{% url 'review-order-item' order_number=order.order_number item_id=row.item.id %}" enctype="multipart/form-data" class="auth-form">
+              {% csrf_token %}
+              <label class="field-label">
+                <span>Rating</span>
+                <select name="rating" required>
+                  <option value="5">5 stars</option>
+                  <option value="4">4 stars</option>
+                  <option value="3">3 stars</option>
+                  <option value="2">2 stars</option>
+                  <option value="1">1 star</option>
+                </select>
+              </label>
+              <label class="field-label">
+                <span>Title</span>
+                <input type="text" name="title" placeholder="Short review title">
+              </label>
+              <label class="field-label">
+                <span>Comment</span>
+                <textarea name="comment" rows="4" placeholder="Share your experience"></textarea>
+              </label>
+              <label class="field-label">
+                <span>Photos</span>
+                <input type="file" name="photos" accept="image/*" multiple>
+              </label>
+              <button class="btn btn--primary" type="submit">Submit review</button>
+            </form>
+            {% else %}
+              <p>Reviews open after delivery.</p>
+            {% endif %}
+          </div>
+
+          <div class="glass-card receipt-action-card">
+            <h3>Return</h3>
+            {% if row.return_request %}
+              <p>Status: {{ row.return_request.get_status_display }}</p>
+              <p>{{ row.return_request.reason }}</p>
+            {% elif row.can_return %}
+            <form method="post" action="{% url 'return-order-item' order_number=order.order_number item_id=row.item.id %}" class="auth-form">
+              {% csrf_token %}
+              <label class="field-label">
+                <span>Reason</span>
+                <input type="text" name="reason" placeholder="Why do you want to return it?" required>
+              </label>
+              <label class="field-label">
+                <span>Details</span>
+                <textarea name="details" rows="4" placeholder="Add more details"></textarea>
+              </label>
+              <button class="btn btn--ghost" type="submit">Request return</button>
+            </form>
+            {% else %}
+              <p>Return window is closed or already requested.</p>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+
+      <div class="receipt-footer">
+        <article>
+          <h3>Payment</h3>
+          <p>Provider: {% if payment %}{{ payment.get_provider_display }}{% else %}Pending{% endif %}</p>
+          <p>Status: {% if payment %}{{ payment.get_status_display }}{% else %}Pending{% endif %}</p>
+          <p>Transaction ID: {% if payment and payment.transaction_id %}{{ payment.transaction_id }}{% else %}Pending{% endif %}</p>
+        </article>
+        <article>
+          <h3>Settlement</h3>
+          <p>Held until: {{ order.seller_settlement_at|default:"After return window" }}</p>
+          <p>Return window closes: {{ order.return_window_ends_at|default:"10 days after delivery" }}</p>
+        </article>
+        <article>
+          <h3>Total</h3>
+          <p>Subtotal: &#8377;{{ order.subtotal }}</p>
+          <p>Shipping: &#8377;{{ order.shipping_fee }}</p>
+          <p>Tax: &#8377;{{ order.tax_total }}</p>
+          <p><strong>Grand total: &#8377;{{ order.grand_total }}</strong></p>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

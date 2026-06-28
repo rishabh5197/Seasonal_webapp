@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% block title %}{{ site_name }} | Home{% endblock %}
+{% block content %}
+<section class="section hero">
+  <div class="container hero-grid">
+    <div class="hero-copy glass-card">
+      <p class="eyebrow">Dynamic storefront</p>
+      <h1>Modern commerce that feels alive, not static.</h1>
+      <p class="lede">This frontend is wired to your database for banners, categories, products, and sales content. Add or remove content from admin and the storefront updates automatically.</p>
+      <div class="hero-actions">
+        <a class="btn btn--primary" href="{% url 'shop' %}">Shop now</a>
+        <a class="btn btn--ghost" href="{% url 'track-order' %}">Track order</a>
+      </div>
+      <div class="hero-stats">
+        <div><strong>{{ stats.products }}</strong><span>active products</span></div>
+        <div><strong>{{ stats.categories }}</strong><span>active categories</span></div>
+        <div><strong>{{ stats.orders }}</strong><span>orders in system</span></div>
+      </div>
+    </div>
+
+    <div class="hero-media glass-card">
+      <div class="hero-media__header">
+        <span class="eyebrow">Sale window</span>
+        <strong>10 second rotating banners</strong>
+      </div>
+      <div class="hero-media__banners">
+        {% if site_banners %}
+          {% for banner in site_banners %}
+          <article class="promo-card promo-card--{{ banner.accent }}" data-hero-banner>
+            <span class="promo-card__tag">{{ banner.badge|default:"Live offer" }}</span>
+            <h3>{{ banner.title }}</h3>
+            <p>{{ banner.subtitle }}</p>
+            <div class="promo-card__meta">
+              {% if banner.start_at and banner.end_at %}
+                <strong>{{ banner.start_at|date:"d M" }} to {{ banner.end_at|date:"d M Y" }}</strong>
+              {% endif %}
+              {% if banner.cta_label %}
+              <a href="{{ banner.cta_url|default:'#' }}">{{ banner.cta_label }}</a>
+              {% endif %}
+            </div>
+          </article>
+          {% endfor %}
+        {% else %}
+          <article class="promo-card promo-card--hero">
+            <span class="promo-card__tag">Admin needed</span>
+            <h3>Create homepage banners in Django admin.</h3>
+            <p>Once banners are added, this card carousel will rotate automatically every 10 seconds.</p>
+          </article>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container trust-grid">
+    <article class="glass-card"><h3>Theme toggle</h3><p>Light and dark mode is saved in the browser and feels native on mobile.</p></article>
+    <article class="glass-card"><h3>Database driven</h3><p>Categories, banners, products, and receipts are fetched from your data model.</p></article>
+    <article class="glass-card"><h3>Future ready</h3><p>The same backend can power web, mobile apps, and seller/admin workflows later.</p></article>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container section-heading">
+    <div>
+      <p class="eyebrow">Categories</p>
+      <h2>Admin-managed categories</h2>
+    </div>
+    <a href="{% url 'shop' %}">Browse all</a>
+  </div>
+  <div class="container category-grid">
+    {% if sale_categories %}
+      {% for category in sale_categories %}
+      <a class="category-card category-card--violet" href="{% url 'shop' %}?category={{ category.slug }}">
+        <span>{{ category.name }}</span>
+        <small>{{ category.product_count }} products</small>
+      </a>
+      {% endfor %}
+    {% else %}
+      <div class="glass-card empty-state">
+        <h3>No categories yet</h3>
+        <p>Ask the admin to create categories in Django admin. The homepage will populate automatically.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="container section-heading">
+    <div>
+      <p class="eyebrow">Featured</p>
+      <h2>Featured products from the database</h2>
+    </div>
+    <a href="{% url 'shop' %}">See all products</a>
+  </div>
+  <div class="product-grid">
+    {% for product in featured_products %}
+    <article class="product-card">
+      <div class="product-card__image">
+        {% with primary=product.images.first %}
+          {% if primary and primary.image %}
+          <img src="{{ primary.image.url }}" alt="{{ product.name }}">
+          {% else %}
+          <div class="image-placeholder"></div>
+          {% endif %}
+        {% endwith %}
+        <span class="product-card__badge">{% if product.is_featured %}Featured{% else %}Live{% endif %}</span>
+      </div>
+      <div class="product-card__body">
+        <p class="product-card__meta">{{ product.category.name }}</p>
+        <h3>{{ product.name }}</h3>
+        <div class="rating">
+          <span>&#9733; {{ product.average_rating|default:"0" }}</span>
+          <small>({{ product.approved_reviews|default:"0" }})</small>
+        </div>
+        <div class="price-row">
+          <strong>&#8377;{{ product.current_price }}</strong>
+          <del>&#8377;{{ product.base_price }}</del>
+        </div>
+        <a class="btn btn--small" href="{% url 'product-detail' product.slug %}">Open product</a>
+      </div>
+    </article>
+    {% empty %}
+    <div class="glass-card empty-state">
+      <h3>No products yet</h3>
+      <p>Admin can add products and mark them featured. This section will fill automatically.</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="container sale-banner">
+    <div class="sale-banner__inner glass-card">
+      <div>
+        <p class="eyebrow">Sale dates</p>
+        <h2>Promotions now come directly from the admin dashboard.</h2>
+        <p>Banner start and end dates are stored in the database so campaigns can change without code edits.</p>
+      </div>
+      <div class="sale-badges">
+        <span>Auto rotating</span>
+        <span>Admin editable</span>
+        <span>Mobile first</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container section-heading">
+    <div>
+      <p class="eyebrow">Latest</p>
+      <h2>New arrivals</h2>
+    </div>
+  </div>
+  <div class="product-grid">
+    {% for product in latest_products %}
+    <article class="product-card product-card--compact">
+      <div class="product-card__image">
+        {% with primary=product.images.first %}
+          {% if primary and primary.image %}
+          <img src="{{ primary.image.url }}" alt="{{ product.name }}">
+          {% else %}
+          <div class="image-placeholder"></div>
+          {% endif %}
+        {% endwith %}
+      </div>
+      <div class="product-card__body">
+        <p class="product-card__meta">{{ product.category.name }}</p>
+        <h3>{{ product.name }}</h3>
+        <div class="price-row">
+          <strong>&#8377;{{ product.current_price }}</strong>
+          <span>{{ product.stock_quantity }} in stock</span>
+        </div>
+      </div>
+    </article>
+    {% empty %}
+    <div class="glass-card empty-state">
+      <h3>No new arrivals yet</h3>
+      <p>Products created in admin will appear here automatically.</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

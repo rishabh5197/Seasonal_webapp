@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}{{ site_name }} | Offers{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container page-hero__inner glass-card">
+    <div>
+      <p class="eyebrow">Offers</p>
+      <h1>Live promotions driven by admin banners and sale prices.</h1>
+      <p>Campaign timing, sale windows, and featured discounts all come from the database so the page updates without code changes.</p>
+    </div>
+    <div class="filter-chips">
+      {% if site_banners %}
+        {% for banner in site_banners %}
+        <span>{{ banner.badge|default:"Live" }}</span>
+        {% endfor %}
+      {% else %}
+        <span>Ask admin to create banners</span>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container offers-grid">
+    {% for offer in offers %}
+    <article class="promo-card promo-card--{{ offer.tone }} glass-card">
+      <span class="promo-card__tag">Offer</span>
+      <h3>{{ offer.title }}</h3>
+      <p>{{ offer.subtitle }}</p>
+      <strong>{{ offer.date_label }}</strong>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="container highlights-grid">
+    {% for item in highlights %}
+    <article class="glass-card highlight-card">
+      <strong>{{ item.value }}</strong>
+      <span>{{ item.title }}</span>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="container section-heading">
+    <div>
+      <p class="eyebrow">Sale categories</p>
+      <h2>Categories with live inventory</h2>
+    </div>
+  </div>
+  <div class="category-grid">
+    {% for category in sale_categories %}
+    <a class="category-card category-card--blue" href="{% url 'shop' %}?category={{ category.slug }}">
+      <span>{{ category.name }}</span>
+      <small>{{ category.active_products }} active products</small>
+    </a>
+    {% empty %}
+    <div class="glass-card empty-state">
+      <h3>No sale categories yet</h3>
+      <p>Ask the admin to add categories and active products in Django admin.</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="container section-heading">
+    <div>
+      <p class="eyebrow">Discounted</p>
+      <h2>Products on promotion</h2>
+    </div>
+  </div>
+  <div class="product-grid">
+    {% for product in sale_products %}
+    <article class="product-card">
+      <div class="product-card__image">
+        {% with primary=product.images.first %}
+          {% if primary and primary.image %}
+          <img src="{{ primary.image.url }}" alt="{{ product.name }}">
+          {% else %}
+          <div class="image-placeholder"></div>
+          {% endif %}
+        {% endwith %}
+        <span class="product-card__badge">{{ product.category.name }}</span>
+      </div>
+      <div class="product-card__body">
+        <p class="product-card__meta">{{ product.owner.full_name }}</p>
+        <h3>{{ product.name }}</h3>
+        <div class="price-row">
+          <strong>&#8377;{{ product.current_price }}</strong>
+          <del>&#8377;{{ product.base_price }}</del>
+        </div>
+        <a class="btn btn--small" href="{% url 'product-detail' product.slug %}">View deal</a>
+      </div>
+    </article>
+    {% empty %}
+    <div class="glass-card empty-state">
+      <h3>No discounted products yet</h3>
+      <p>Mark products with a sale price in admin and they will appear here automatically.</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

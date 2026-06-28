@@ -1,0 +1,122 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ site_name }}{% endblock %}</title>
+  <meta name="description" content="A premium multi-vendor e-commerce storefront.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <div class="theme-shell" data-theme-shell>
+    <header class="site-header">
+      <div class="container header-shell">
+        <a class="brand" href="{% url 'home' %}">
+          <span class="brand__mark">{{ site_name|slice:":1"|upper }}</span>
+          <span class="brand__text">
+            <strong>{{ site_name }}</strong>
+            <small>{{ site_tagline }}</small>
+          </span>
+        </a>
+
+        <form class="search-bar" action="{% url 'shop' %}" method="get">
+          <input type="search" name="q" placeholder="Search products, brands, categories">
+          <button type="submit">Search</button>
+        </form>
+
+        <div class="header-actions">
+          {% if request.user.is_authenticated %}
+            <a href="{% url 'account' %}" class="header-link">{{ request.user.full_name|default:request.user.email }}</a>
+            {% if request.user.is_staff %}
+              <a href="{% url 'admin:index' %}" class="header-link">Admin</a>
+            {% endif %}
+            <a href="{% url 'site_auth:logout' %}" class="header-link">Logout</a>
+          {% else %}
+            <a href="{% url 'site_auth:login' %}" class="header-link">Sign in</a>
+            <a href="{% url 'site_auth:register' %}" class="header-link">Register</a>
+          {% endif %}
+          <a href="{% url 'membership' %}" class="header-link">Premium</a>
+          <a href="{% url 'cart' %}" class="cart-pill">Cart <span>{{ cart_count|default:0 }}</span></a>
+          <button type="button" class="theme-toggle" data-theme-toggle aria-label="Toggle light and dark mode" aria-pressed="false">
+            <span class="theme-toggle__track" aria-hidden="true">
+              <span class="theme-toggle__icon theme-toggle__icon--sun">&#9728;</span>
+              <span class="theme-toggle__thumb"></span>
+              <span class="theme-toggle__icon theme-toggle__icon--moon">&#9680;</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <nav class="nav-rail">
+        <div class="container nav-rail__inner">
+          <a href="{% url 'home' %}">Home</a>
+          <a href="{% url 'shop' %}">All Products</a>
+          <a href="{% url 'membership' %}">Premium</a>
+          {% if site_categories %}
+            {% for category in site_categories %}
+            <a href="{% url 'shop' %}?category={{ category.slug }}">{{ category.name }}</a>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div>
+          <h4>{{ site_name }}</h4>
+          <p>{{ site_tagline }} frontend designed for scale, conversion, and mobile-first shopping.</p>
+        </div>
+        <div>
+          <h5>Categories</h5>
+          {% if site_categories %}
+            {% for category in site_categories|slice:":5" %}
+            <a href="{% url 'shop' %}?category={{ category.slug }}">{{ category.name }}</a>
+            {% endfor %}
+          {% else %}
+            <a href="#">Create categories in admin</a>
+          {% endif %}
+        </div>
+        <div>
+          <h5>Store</h5>
+          <a href="{% url 'shop' %}">Shop</a>
+          <a href="{% url 'cart' %}">Cart</a>
+          <a href="{% url 'checkout' %}">Checkout</a>
+          <a href="{% url 'track-order' %}">Track order</a>
+          <a href="{% url 'membership' %}">Premium membership</a>
+        </div>
+        <div>
+          <h5>Support</h5>
+          <a href="#">Shipping</a>
+          <a href="#">Returns</a>
+          <a href="#">Help Center</a>
+        </div>
+      </div>
+    </footer>
+
+    <nav class="mobile-nav" aria-label="Mobile navigation">
+      <a href="{% url 'home' %}">Home</a>
+      <a href="{% url 'shop' %}">Shop</a>
+      {% if request.user.is_authenticated %}
+        <a href="{% url 'account' %}">Account</a>
+        <a href="{% url 'site_auth:logout' %}">Logout</a>
+      {% else %}
+        <a href="{% url 'site_auth:login' %}">Sign in</a>
+        <a href="{% url 'site_auth:register' %}">Register</a>
+      {% endif %}
+    </nav>
+
+    <script src="{% static 'js/site.js' %}"></script>
+    {% block scripts %}{% endblock %}
+  </div>
+</body>
+</html>

@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}{{ site_name }} | Premium membership{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container page-hero">
+    <div class="glass-card page-hero__inner">
+      <div>
+        <p class="eyebrow">Membership</p>
+        <h1>Compare premium and standard shopping</h1>
+        <p>
+          Premium membership is admin-controlled, renews yearly, and unlocks priority benefits for shoppers who want faster access and a better shipping experience.
+        </p>
+        <div class="action-row">
+          <a class="btn btn--ghost" href="{% url 'account' %}">Back to account</a>
+          <form method="post">
+            {% csrf_token %}
+            <button class="btn btn--primary" type="submit">
+              {% if premium_active %}Renew premium membership{% else %}Buy premium membership{% endif %}
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="dashboard-hero">
+        <p class="eyebrow">Annual price</p>
+        <h2>&#8377;{{ policy.premium_membership_annual_fee }}</h2>
+        <p>
+          {% if premium_expires_at %}
+            {% if premium_active %}
+              Your premium access is active until {{ premium_expires_at|date:"d M Y" }}.
+            {% else %}
+              Your previous premium access ended on {{ premium_expires_at|date:"d M Y" }}.
+            {% endif %}
+          {% else %}
+            Start premium access today and renew whenever you want.
+          {% endif %}
+        </p>
+        <div class="countdown-pill">Duration: {{ policy.premium_membership_duration_days }} days</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Benefits</p>
+        <h2>Why premium feels better</h2>
+      </div>
+    </div>
+    <div class="feature-grid">
+      {% for benefit in benefits %}
+      <article class="glass-card feature-card">
+        <h3>{{ benefit }}</h3>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Comparison</p>
+        <h2>Premium vs standard</h2>
+      </div>
+    </div>
+    <div class="feature-grid">
+      {% for row in comparison_rows %}
+      <article class="glass-card feature-card">
+        <p class="eyebrow">{{ row.label }}</p>
+        <h3>Premium</h3>
+        <p>{{ row.premium }}</p>
+        <h3>Standard</h3>
+        <p>{{ row.regular }}</p>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="glass-card centered-card">
+      <p class="eyebrow">Action</p>
+      <h2>Ready to switch to premium?</h2>
+      <p>
+        The annual fee is currently admin-managed at &#8377;{{ policy.premium_membership_annual_fee }}. If the price changes later, this page will reflect the new value automatically.
+      </p>
+      <form method="post" class="action-row" style="justify-content:center;">
+        {% csrf_token %}
+        <button class="btn btn--primary" type="submit">
+          {% if premium_active %}Renew now{% else %}Buy now{% endif %}
+        </button>
+        <a class="btn btn--ghost" href="{% url 'shop' %}">Keep shopping</a>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

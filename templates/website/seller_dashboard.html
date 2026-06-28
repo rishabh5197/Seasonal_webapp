@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}{{ site_name }} | Seller Dashboard{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container seller-dashboard">
+    <div class="glass-card dashboard-hero">
+      <p class="eyebrow">Seller dashboard</p>
+      <h1>Market performance, product revenue, and category earnings.</h1>
+      {% if is_seller %}
+      <p>This dashboard is driven by live order and product data, grouped by category and product performance.</p>
+      {% else %}
+      <p>Seller access will appear when a seller logs in. The UI shell is ready for that future flow.</p>
+      {% endif %}
+    </div>
+    <div class="stats-grid">
+      <article class="glass-card stat-card"><strong>&#8377;{{ revenue_total }}</strong><span>Total earnings</span></article>
+      <article class="glass-card stat-card"><strong>&#8377;{{ settled_total }}</strong><span>Released to seller</span></article>
+      <article class="glass-card stat-card"><strong>&#8377;{{ held_total }}</strong><span>Held in return window</span></article>
+      <article class="glass-card stat-card"><strong>{{ units_total }}</strong><span>Units sold</span></article>
+      <article class="glass-card stat-card"><strong>{{ product_count }}</strong><span>Products tracked</span></article>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Categories</p>
+        <h2>Revenue by product group</h2>
+      </div>
+    </div>
+    <div class="highlights-grid">
+      {% for category, revenue in category_rows %}
+      <article class="glass-card highlight-card">
+        <strong>&#8377;{{ revenue }}</strong>
+        <span>{{ category }}</span>
+      </article>
+      {% empty %}
+      <div class="glass-card empty-state">
+        <h3>No seller metrics yet</h3>
+        <p>Once products and orders are live, category earnings will populate here.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Products</p>
+        <h2>Product performance in market</h2>
+      </div>
+    </div>
+    <div class="product-grid">
+      {% for row in products %}
+      <article class="product-card">
+        <div class="product-card__body">
+          <p class="product-card__meta">{{ row.product.category.name }}</p>
+          <h3>{{ row.product.name }}</h3>
+          <div class="rating">
+            <span>&#9733; {{ row.average_rating|floatformat:1 }}</span>
+            <small>({{ row.review_count }} reviews)</small>
+          </div>
+          <div class="price-row">
+            <strong>&#8377;{{ row.revenue }}</strong>
+            <span>{{ row.units }} units</span>
+          </div>
+          <div class="card-meta-row">
+            <span>Released: &#8377;{{ row.settled_revenue }}</span>
+            <span>Held: &#8377;{{ row.held_revenue }}</span>
+          </div>
+        </div>
+      </article>
+      {% empty %}
+      <div class="glass-card empty-state">
+        <h3>No products yet</h3>
+        <p>Seller products and their market performance will appear here after the catalog is populated.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

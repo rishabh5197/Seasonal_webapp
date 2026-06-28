@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}{{ site_name }} | Account{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container account-layout">
+    <div class="glass-card account-panel">
+      <p class="eyebrow">Account</p>
+      <div class="account-avatar">
+        {% if profile.avatar_image %}
+          <img src="{{ profile.avatar_image.url }}" alt="{{ profile.name }} avatar">
+        {% else %}
+          <span>{{ profile.avatar_glyph }}</span>
+        {% endif %}
+      </div>
+      <h1>{{ profile.name }}</h1>
+      <p>{{ profile.email }}</p>
+      <span class="tier-pill">{{ profile.role }}</span>
+      <div class="product-badges">
+        {% if profile.birth_date %}
+          <span>Birth date: {{ profile.birth_date|date:"d M Y" }}</span>
+        {% endif %}
+        {% if profile.gender %}
+          <span>Gender: {{ profile.gender }}</span>
+        {% endif %}
+      </div>
+      <div class="product-badges">
+        {% if membership.is_active %}
+          <span>Premium active</span>
+          {% if membership.expires_at %}
+            <span>Renews / expires on {{ membership.expires_at|date:"d M Y" }}</span>
+          {% endif %}
+        {% else %}
+          <span>Standard membership</span>
+        {% endif %}
+      </div>
+      <div class="action-row">
+        <a class="btn btn--primary" href="{% url 'membership' %}">
+          {% if membership.is_active %}Renew premium{% else %}Upgrade to premium{% endif %}
+        </a>
+      </div>
+    </div>
+    <div class="stats-grid">
+      {% for stat in stats %}
+      <article class="glass-card stat-card">
+        <strong>{{ stat.value }}</strong>
+        <span>{{ stat.label }}</span>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Orders</p>
+        <h2>Recent orders</h2>
+      </div>
+      <a href="{% url 'track-order' %}">Track an order</a>
+    </div>
+    <div class="order-list glass-card">
+      {% for order in recent_orders %}
+      <div class="order-row">
+        <div>
+          <strong>{{ order.order_number }}</strong>
+          <p>{{ order.get_status_display }}</p>
+        </div>
+        <span>&#8377;{{ order.grand_total }}</span>
+      </div>
+      {% empty %}
+      <div class="empty-state">
+        <h3>No orders yet</h3>
+        <p>Your order history will appear here after checkout.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

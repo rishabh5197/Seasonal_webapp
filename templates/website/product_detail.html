@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}{{ site_name }} | {{ product.name }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container product-detail">
+    <div class="product-gallery glass-card">
+      {% with primary=product.images.first %}
+        {% if primary and primary.image %}
+        <img src="{{ primary.image.url }}" alt="{{ product.name }}">
+        {% else %}
+        <div class="image-placeholder image-placeholder--large"></div>
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <div class="product-info">
+      <p class="eyebrow">{{ product.category.name }}</p>
+      <h1>{{ product.name }}</h1>
+      <div class="rating rating--large">
+        <span>&#9733; {{ average_rating|floatformat:1 }}</span>
+        <small>({{ review_count }} reviews)</small>
+      </div>
+      <div class="price-row price-row--large">
+        <strong>&#8377;{{ product.current_price }}</strong>
+        <del>&#8377;{{ product.base_price }}</del>
+        <span>{{ product.stock_quantity }} available</span>
+      </div>
+      <p class="product-summary">
+        {{ product.description|default:"This product page pulls live data from the database, including reviews, ratings, and warranty details." }}
+      </p>
+      <div class="product-badges">
+        <span>Seller: {{ product.owner.full_name }}</span>
+        <span>Warranty: {{ product.warranty_months }} months</span>
+        <span>Return window: {{ product.return_window_days }} days</span>
+      </div>
+      <div class="action-row">
+        <form method="post" action="{% url 'add-to-cart' product.slug %}">
+          {% csrf_token %}
+          <input type="hidden" name="quantity" value="1">
+          <input type="hidden" name="next" value="{% url 'cart' %}">
+          <button class="btn btn--primary" type="submit">Add to cart</button>
+        </form>
+        <a class="btn btn--ghost" href="{% url 'track-order' %}">Track order</a>
+      </div>
+      <ul class="bullet-list">
+        <li>Verified purchase reviews with photo upload support in the data model</li>
+        <li>Return requests can be made within the configured return window</li>
+        <li>Seller payout is held until the return window closes after delivery</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Reviews</p>
+        <h2>Customer feedback</h2>
+      </div>
+    </div>
+    <div class="reviews-grid">
+      {% for review in reviews %}
+      <article class="glass-card review-card">
+        <div class="rating">
+          <span>&#9733; {{ review.rating }}</span>
+          <small>{{ review.user.full_name }}</small>
+        </div>
+        {% if review.title %}<h3>{{ review.title }}</h3>{% endif %}
+        <p>{{ review.comment }}</p>
+        {% if review.images.all %}
+        <div class="review-photos">
+          {% for photo in review.images.all %}
+            <img src="{{ photo.image.url }}" alt="{{ photo.caption|default:review.title }}">
+          {% endfor %}
+        </div>
+        {% endif %}
+      </article>
+      {% empty %}
+      <div class="glass-card empty-state">
+        <h3>No reviews yet</h3>
+        <p>Once the order is delivered, verified customers can comment, rate, and attach photos.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Related</p>
+        <h2>More from the same category</h2>
+      </div>
+    </div>
+    <div class="product-grid product-grid--compact">
+      {% for item in related_products %}
+      <article class="product-card product-card--compact">
+        <div class="product-card__image">
+          {% with primary=item.images.first %}
+            {% if primary and primary.image %}
+            <img src="{{ primary.image.url }}" alt="{{ item.name }}">
+            {% else %}
+            <div class="image-placeholder"></div>
+            {% endif %}
+          {% endwith %}
+        </div>
+        <div class="product-card__body">
+          <p class="product-card__meta">{{ item.brand.name|default:"No brand" }}</p>
+          <h3>{{ item.name }}</h3>
+          <div class="price-row">
+            <strong>&#8377;{{ item.current_price }}</strong>
+            <span>{{ item.stock_quantity }} in stock</span>
+          </div>
+          <a class="btn btn--small" href="{% url 'product-detail' item.slug %}">Open product</a>
+        </div>
+      </article>
+      {% empty %}
+      <div class="glass-card empty-state">
+        <h3>No related products</h3>
+        <p>Related products will appear as soon as the admin adds more catalog items.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

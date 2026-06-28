@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block title %}{{ site_name }} | Checkout{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container checkout-layout">
+    <div class="checkout-steps glass-card">
+      <p class="eyebrow">Checkout</p>
+      <h1>Shipping, billing, and payment gateway selection</h1>
+      <p>This checkout is backed by live cart data, saved addresses, and an order record that is ready for payment capture.</p>
+      <div class="stepper">
+        <span>Cart</span>
+        <span>Address</span>
+        <span>Gateway</span>
+        <span>Receipt</span>
+      </div>
+
+      <form method="post" class="checkout-form">
+        {% csrf_token %}
+        {% if not addresses %}
+        <div class="empty-state">
+          <h3>No saved addresses yet</h3>
+          <p>Add an address from your account before placing the order.</p>
+        </div>
+        {% endif %}
+        <label class="field-label">
+          <span>Shipping address</span>
+          {{ form.shipping_address }}
+          {{ form.shipping_address.errors }}
+        </label>
+        <label class="checkbox-pill">
+          {{ form.billing_same_as_shipping }}
+          <span>Billing address is the same as shipping</span>
+        </label>
+        <label class="field-label">
+          <span>Billing address</span>
+          {{ form.billing_address }}
+          {{ form.billing_address.errors }}
+        </label>
+        <label class="field-label">
+          <span>Payment gateway</span>
+          {{ form.payment_provider }}
+          {{ form.payment_provider.errors }}
+        </label>
+        <label class="field-label">
+          <span>Order note</span>
+          {{ form.note }}
+          {{ form.note.errors }}
+        </label>
+        {% if form.non_field_errors %}
+          <div class="form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <button class="btn btn--primary btn--full" type="submit">Continue to payment</button>
+      </form>
+
+      <div class="checkout-panels">
+        <article class="checkout-panel">
+          <h3>Gateway ready</h3>
+          <p>Razorpay, Stripe, and Cash on delivery are wired into the data model so we can connect live credentials next.</p>
+        </article>
+        <article class="checkout-panel">
+          <h3>Notifications</h3>
+          <p>Email, SMS, and WhatsApp notifications are recorded in the model layer and can be connected to providers later.</p>
+        </article>
+      </div>
+    </div>
+
+    <aside class="summary-panel glass-card">
+      <h2>Pay securely</h2>
+      <div class="summary-row"><span>Subtotal</span><strong>&#8377;{{ summary.subtotal }}</strong></div>
+      <div class="summary-row"><span>Shipping</span><strong>&#8377;{{ summary.shipping_fee }}</strong></div>
+      <div class="summary-row"><span>Discount</span><strong>&#8377;{{ summary.discount_total }}</strong></div>
+      <div class="summary-row"><span>Tax</span><strong>&#8377;{{ summary.tax_total }}</strong></div>
+      <div class="summary-row summary-row--total"><span>Grand total</span><strong>&#8377;{{ summary.grand_total }}</strong></div>
+      <p class="product-summary">Choose a gateway below and complete payment to generate the receipt.</p>
+      {% if summary.is_premium_member %}
+        <p class="product-summary">Premium members get free shipping from &#8377;{{ summary.shipping_threshold }} and above.</p>
+      {% else %}
+        <p class="product-summary">Non-premium members get free shipping from &#8377;{{ summary.shipping_threshold }} and above. Below that, shipping is &#8377;{{ summary.shipping_fee_amount }}.</p>
+      {% endif %}
+    </aside>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container section-heading">
+    <div>
+      <p class="eyebrow">Order items</p>
+      <h2>Items ready for checkout</h2>
+    </div>
+  </div>
+  <div class="product-grid">
+    {% for item in items %}
+    <article class="product-card product-card--compact">
+      <div class="product-card__body">
+        <p class="product-card__meta">{{ item.product.category.name }}</p>
+        <h3>{{ item.product.name }}</h3>
+        <div class="price-row">
+          <strong>&#8377;{{ item.line_total }}</strong>
+          <span>Qty {{ item.quantity }}</span>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

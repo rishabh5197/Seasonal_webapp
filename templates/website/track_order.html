@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}{{ site_name }} | Track Order{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container track-layout">
+    <div class="glass-card track-search">
+      <p class="eyebrow">Track order</p>
+      <h1>Find every step from placed to delivered</h1>
+      <form method="get" class="track-form">
+        <input type="text" name="order_number" value="{{ order_number }}" placeholder="Enter order number or tracking number">
+        <button class="btn btn--primary" type="submit">Track</button>
+      </form>
+      <p>Once the order is delivered, the return window stays open for 10 days before seller settlement is released.</p>
+    </div>
+
+    <aside class="summary-panel glass-card">
+      <h2>Status</h2>
+      {% if order %}
+        <div class="summary-row"><span>Order</span><strong>{{ order.order_number }}</strong></div>
+        <div class="summary-row"><span>Tracking</span><strong>{{ order.tracking_number }}</strong></div>
+        <div class="summary-row"><span>Current status</span><strong>{{ order.get_status_display }}</strong></div>
+        <div class="summary-row"><span>Settlement</span><strong>{{ order.get_settlement_status_display }}</strong></div>
+        {% if order.delivered_at %}
+        <div class="summary-row"><span>Delivered</span><strong>{{ order.delivered_at }}</strong></div>
+        <div class="summary-row"><span>Return window ends</span><strong>{{ order.return_window_ends_at }}</strong></div>
+        <div class="summary-row"><span>Seller payout</span><strong>{{ order.seller_settlement_at }}</strong></div>
+        {% endif %}
+        <a class="btn btn--ghost btn--full" href="{% url 'receipt' order_number=order.order_number %}">View receipt</a>
+      {% else %}
+        <div class="empty-state">
+          <h3>No order found</h3>
+          <p>Search with a valid order number or tracking number.</p>
+        </div>
+      {% endif %}
+    </aside>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Timeline</p>
+        <h2>Tracking events</h2>
+      </div>
+    </div>
+    <div class="timeline">
+      {% for event in events %}
+      <article class="glass-card timeline-card">
+        <strong>{{ event.title }}</strong>
+        <p>{{ event.description }}</p>
+        <div class="timeline-meta">
+          <span>{{ event.get_event_type_display }}</span>
+          <span>{{ event.occurred_at }}</span>
+          <span>{{ event.location }}</span>
+        </div>
+      </article>
+      {% empty %}
+      <div class="glass-card empty-state">
+        <h3>No tracking events yet</h3>
+        <p>Once an order is created, packed, shipped, and delivered, the timeline will populate automatically.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

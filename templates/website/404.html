@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}{{ site_name }} | Not Found{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container glass-card centered-card">
+    <p class="eyebrow">404</p>
+    <h1>Page not found</h1>
+    <p>The page may have moved or the link may be invalid.</p>
+    <a class="btn btn--primary" href="{% url 'home' %}">Back to home</a>
+  </div>
+</section>
+{% endblock %}

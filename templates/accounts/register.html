@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}{{ site_name }} | Register{% endblock %}
+{% block content %}
+<section class="section auth-section">
+  <div class="container auth-shell">
+    <div class="auth-copy">
+      <p class="eyebrow">Create account</p>
+      <h1>Start shopping with your customer profile</h1>
+      <p>Create a secure customer account to place orders, save addresses, track deliveries, and receive receipts.</p>
+      <div class="auth-links">
+        <a href="{% url 'site_auth:login' %}">Already have an account? Sign in</a>
+      </div>
+    </div>
+
+    <div class="auth-card glass-card">
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+          <div class="message message--{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% if form.non_field_errors %}
+        <div class="form-errors">{{ form.non_field_errors }}</div>
+      {% endif %}
+      <form method="post" class="auth-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label class="field-label">
+          <span>Full name</span>
+          {{ form.full_name }}
+          {% if form.full_name.errors %}<div class="form-errors">{{ form.full_name.errors }}</div>{% endif %}
+        </label>
+        <label class="field-label">
+          <span>Email</span>
+          {{ form.email }}
+          {% if form.email.errors %}<div class="form-errors">{{ form.email.errors }}</div>{% endif %}
+        </label>
+        <label class="field-label">
+          <span>Phone number</span>
+          {{ form.phone_number }}
+          {% if form.phone_number.errors %}<div class="form-errors">{{ form.phone_number.errors }}</div>{% endif %}
+        </label>
+        <label class="field-label">
+          <span>Birth date</span>
+          <div class="date-picker" data-date-picker>
+            {{ form.birth_date }}
+            <button type="button" class="date-picker__button" data-date-toggle aria-label="Open birth date calendar">
+              <span aria-hidden="true">&#128197;</span>
+            </button>
+            <div class="date-picker__panel" data-date-panel hidden></div>
+          </div>
+          {% if form.birth_date.errors %}<div class="form-errors">{{ form.birth_date.errors }}</div>{% endif %}
+        </label>
+        <div class="field-label">
+          <span>Gender</span>
+          <div class="choice-grid choice-grid--gender" role="radiogroup" aria-label="Gender">
+            {% for radio in form.gender %}
+            <label class="choice-pill choice-pill--icon">
+              {{ radio.tag }}
+              <span class="choice-pill__visual">
+                <span class="choice-pill__icon">
+                  {% if radio.choice_label == 'Male' %}
+                    &#9794;
+                  {% elif radio.choice_label == 'Female' %}
+                    &#9792;
+                  {% else %}
+                    &#9711;
+                  {% endif %}
+                </span>
+                <span class="choice-pill__text">{{ radio.choice_label }}</span>
+              </span>
+            </label>
+            {% endfor %}
+          </div>
+          {% if form.gender.errors %}<div class="form-errors">{{ form.gender.errors }}</div>{% endif %}
+        </div>
+        <div class="field-label">
+          <span>Profile image</span>
+          <p class="field-hint">Upload a photo or pick a preset icon.</p>
+          <div class="field-row field-row--profile">
+            <label class="field-label field-label--compact">
+              <span>Upload photo</span>
+              {{ form.avatar_image }}
+              {% if form.avatar_image.errors %}<div class="form-errors">{{ form.avatar_image.errors }}</div>{% endif %}
+            </label>
+            <label class="field-label field-label--compact">
+              <span>Avatar icon</span>
+              {{ form.avatar_choice }}
+              {% if form.avatar_choice.errors %}<div class="form-errors">{{ form.avatar_choice.errors }}</div>{% endif %}
+            </label>
+          </div>
+        </div>
+        <label class="field-label">
+          <span>Password</span>
+          {{ form.password }}
+          {% if form.password.errors %}<div class="form-errors">{{ form.password.errors }}</div>{% endif %}
+        </label>
+        <label class="field-label">
+          <span>Confirm password</span>
+          {{ form.password_confirm }}
+          {% if form.password_confirm.errors %}<div class="form-errors">{{ form.password_confirm.errors }}</div>{% endif %}
+        </label>
+        <button type="submit" class="btn btn--primary btn--full">Create account</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

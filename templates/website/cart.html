@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}{{ site_name }} | Cart{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container cart-layout">
+    <div class="cart-items glass-card">
+      <p class="eyebrow">Cart</p>
+      <h1>Your live basket</h1>
+      {% if items %}
+        {% for item in items %}
+        <article class="cart-item">
+          <div class="cart-item__thumb">
+            {% with primary=item.product.images.first %}
+              {% if primary and primary.image %}
+              <img src="{{ primary.image.url }}" alt="{{ item.product.name }}">
+              {% endif %}
+            {% endwith %}
+          </div>
+          <div class="cart-item__body">
+            <h3>{{ item.product.name }}</h3>
+            <p>{{ item.product.category.name }} | {{ item.product.stock_quantity }} in stock</p>
+            <p>{{ item.product.owner.full_name }}</p>
+            <form class="field-row" method="post" action="{% url 'update-cart-item' item.id %}">
+              {% csrf_token %}
+              <label class="field-label">
+                <span>Qty</span>
+                <input type="number" name="quantity" min="1" max="{{ item.product.max_purchase_qty }}" value="{{ item.quantity }}">
+              </label>
+              <button class="btn btn--ghost" type="submit">Update</button>
+            </form>
+            <form method="post" action="{% url 'remove-cart-item' item.id %}">
+              {% csrf_token %}
+              <button class="btn btn--ghost" type="submit">Remove</button>
+            </form>
+          </div>
+          <strong>&#8377;{{ item.line_total }}</strong>
+        </article>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <h3>No items in cart yet</h3>
+          <p>Open any product and add it to the basket to continue checkout.</p>
+        </div>
+      {% endif %}
+    </div>
+    <aside class="summary-panel glass-card">
+      <h2>Order summary</h2>
+      <div class="summary-row"><span>Subtotal</span><strong>&#8377;{{ summary.subtotal }}</strong></div>
+      <div class="summary-row"><span>Shipping</span><strong>&#8377;{{ summary.shipping_fee }}</strong></div>
+      <div class="summary-row"><span>Discount</span><strong>&#8377;{{ summary.discount_total }}</strong></div>
+      <div class="summary-row"><span>Tax</span><strong>&#8377;{{ summary.tax_total }}</strong></div>
+      <div class="summary-row summary-row--total"><span>Total</span><strong>&#8377;{{ summary.grand_total }}</strong></div>
+      {% if summary.is_premium_member %}
+        <p class="product-summary">Premium members get free shipping from &#8377;{{ summary.shipping_threshold }} and above. Your current cart is treated as premium.</p>
+      {% else %}
+        <p class="product-summary">Non-premium members get free shipping from &#8377;{{ summary.shipping_threshold }} and above. Below that a shipping fee of &#8377;{{ summary.shipping_fee_amount }} applies.</p>
+      {% endif %}
+      <a class="btn btn--primary btn--full" href="{% url 'checkout' %}">Proceed to checkout</a>
+      <a class="btn btn--ghost btn--full" href="{% url 'membership' %}">View premium membership</a>
+    </aside>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container section-heading">
+    <div>
+      <p class="eyebrow">Recommended</p>
+      <h2>Products from the database</h2>
+    </div>
+  </div>
+  <div class="product-grid">
+    {% for product in recommended_products %}
+    <article class="product-card">
+      <div class="product-card__image">
+        {% with primary=product.images.first %}
+          {% if primary and primary.image %}
+          <img src="{{ primary.image.url }}" alt="{{ product.name }}">
+          {% else %}
+          <div class="image-placeholder"></div>
+          {% endif %}
+        {% endwith %}
+      </div>
+      <div class="product-card__body">
+        <h3>{{ product.name }}</h3>
+        <div class="price-row">
+          <strong>&#8377;{{ product.current_price }}</strong>
+          <span>{{ product.stock_quantity }} in stock</span>
+        </div>
+        <a class="btn btn--small" href="{% url 'product-detail' product.slug %}">Open product</a>
+      </div>
+    </article>
+    {% empty %}
+    <div class="glass-card empty-state">
+      <h3>No recommendations yet</h3>
+      <p>Add products in admin and this section will populate automatically.</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

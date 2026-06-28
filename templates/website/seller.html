@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}{{ site_name }} | Sell{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container seller-hero glass-card">
+    <div>
+      <p class="eyebrow">Sell with us</p>
+      <h1>Launch your seller storefront with approval, inventory, and order control.</h1>
+      <p>Designed for multi-vendor operations, onboarding, and business growth.</p>
+    </div>
+    <a class="btn btn--primary" href="{% url 'offers' %}">View offers</a>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container feature-grid">
+    {% for benefit in benefits %}
+    <article class="glass-card feature-card">
+      <h3>{{ benefit }}</h3>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="container glass-card seller-steps">
+    <p class="eyebrow">Onboarding</p>
+    <h2>How seller registration works</h2>
+    <ol>
+      {% for step in steps %}
+      <li>{{ step }}</li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}{{ site_name }} | Payment{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container checkout-layout">
+    <div class="glass-card checkout-steps">
+      <p class="eyebrow">Payment</p>
+      <h1>Complete payment for {{ order.order_number }}</h1>
+      <p>This page stands in for the hosted gateway step. Once Razorpay or Stripe credentials are connected, this is where the redirect or callback will land.</p>
+      <div class="stepper">
+        <span>{{ gateway_label }}</span>
+        <span>{{ order.get_status_display }}</span>
+        <span>&#8377;{{ payment.amount }}</span>
+      </div>
+
+      <form method="post" class="checkout-form">
+        {% csrf_token %}
+        <label class="field-label">
+          <span>Provider</span>
+          {{ form.provider }}
+          {{ form.provider.errors }}
+        </label>
+        <label class="field-label">
+          <span>Transaction ID</span>
+          {{ form.transaction_id }}
+          {{ form.transaction_id.errors }}
+        </label>
+        <label class="field-label">
+          <span>Gateway reference</span>
+          {{ form.gateway_reference }}
+          {{ form.gateway_reference.errors }}
+        </label>
+        <button class="btn btn--primary btn--full" type="submit">Mark payment as complete</button>
+      </form>
+    </div>
+
+    <aside class="summary-panel glass-card">
+      <h2>Payment summary</h2>
+      <div class="summary-row"><span>Order</span><strong>{{ order.order_number }}</strong></div>
+      <div class="summary-row"><span>Provider</span><strong>{{ gateway_label }}</strong></div>
+      <div class="summary-row"><span>Amount</span><strong>&#8377;{{ payment.amount }}</strong></div>
+      <div class="summary-row"><span>Current status</span><strong>{{ payment.get_status_display }}</strong></div>
+      <p class="product-summary">After capture, the receipt is generated and the order becomes trackable in the browser.</p>
+    </aside>
+  </div>
+</section>
+{% endblock %}

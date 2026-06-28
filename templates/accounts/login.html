@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}{{ site_name }} | Sign in{% endblock %}
+{% block content %}
+<section class="section auth-section">
+  <div class="container auth-shell auth-shell--unified">
+    <div class="auth-copy">
+      {% if role == 'customer' %}
+        <p class="eyebrow">Customer access</p>
+        <h1>Sign in with password or OTP</h1>
+        <p>Enter your email address or mobile number. The form will accept either, and OTP works from the same screen.</p>
+        <div class="auth-links">
+          <a href="{% url 'site_auth:register' %}">Create a customer account</a>
+        </div>
+      {% elif role == 'seller' %}
+        <p class="eyebrow">Seller access</p>
+        <h1>Sign in to the seller dashboard</h1>
+        <p>Seller accounts keep product and inventory tools in a separate route.</p>
+        <div class="auth-links">
+          <a href="{% url 'site_auth:seller-otp-login' %}">Use seller OTP login</a>
+        </div>
+      {% else %}
+        <p class="eyebrow">Admin access</p>
+        <h1>Sign in to the admin console</h1>
+        <p>Admin access is reserved for platform operators.</p>
+        <div class="auth-links">
+          <a href="{% url 'site_auth:admin-otp-login' %}">Use admin OTP login</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="auth-card glass-card">
+      {% if messages %}
+        <div class="messages">
+          {% for message in messages %}
+          <div class="message message--{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% if role == 'customer' %}
+        <div class="auth-mode-tabs" id="auth-mode-tabs" role="tablist" aria-label="Choose login method">
+          <button type="button" class="auth-mode-tab{% if active_mode != 'otp' %} is-active{% endif %}" data-auth-mode="password">Password</button>
+          <button type="button" class="auth-mode-tab{% if active_mode == 'otp' %} is-active{% endif %}" data-auth-mode="otp">OTP</button>
+        </div>
+
+        <div class="auth-mode-panels">
+          <div class="auth-mode-panel{% if active_mode != 'otp' %} is-active{% endif %}" data-auth-panel="password">
+            <form method="post" class="auth-form">
+              {% csrf_token %}
+              <input type="hidden" name="auth_action" value="password">
+              <label class="field-label">
+                <span>Email or mobile number</span>
+                {{ password_form.identifier }}
+              </label>
+              <p class="field-hint">Type an email address or a mobile number. We will detect the format automatically.</p>
+              <label class="field-label">
+                <span>Password</span>
+                {{ password_form.password }}
+              </label>
+              {% if password_form.non_field_errors %}
+                <div class="form-errors">{{ password_form.non_field_errors }}</div>
+              {% endif %}
+              {% if password_form.identifier.errors %}
+                <div class="form-errors">{{ password_form.identifier.errors }}</div>
+              {% endif %}
+              {% if password_form.password.errors %}
+                <div class="form-errors">{{ password_form.password.errors }}</div>
+              {% endif %}
+              <button type="submit" class="btn btn--primary btn--full">Sign in</button>
+            </form>
+          </div>
+
+          <div class="auth-mode-panel{% if active_mode == 'otp' %} is-active{% endif %}" data-auth-panel="otp" id="auth-otp">
+            <form method="post" class="auth-form">
+              {% csrf_token %}
+              <input type="hidden" name="auth_action" value="otp">
+              <label class="field-label">
+                <span>Email or mobile number</span>
+                {{ otp_form.identifier }}
+              </label>
+              <p class="field-hint">We send the OTP to your registered email or mobile route. If it does not arrive, try again after 30 seconds.</p>
+              {% if otp_form.non_field_errors %}
+                <div class="form-errors">{{ otp_form.non_field_errors }}</div>
+              {% endif %}
+              {% if otp_form.identifier.errors %}
+                <div class="form-errors">{{ otp_form.identifier.errors }}</div>
+              {% endif %}
+              <button type="submit" class="btn btn--primary btn--full">Send OTP</button>
+            </form>
+          </div>
+        </div>
+      {% else %}
+        <form method="post" class="auth-form">
+          {% csrf_token %}
+          <input type="hidden" name="auth_action" value="password">
+          <label class="field-label">
+            <span>Email</span>
+            {{ password_form.identifier }}
+            {% if password_form.identifier.errors %}<div class="form-errors">{{ password_form.identifier.errors }}</div>{% endif %}
+          </label>
+          <label class="field-label">
+            <span>Password</span>
+            {{ password_form.password }}
+            {% if password_form.password.errors %}<div class="form-errors">{{ password_form.password.errors }}</div>{% endif %}
+          </label>
+          {% if password_form.non_field_errors %}
+            <div class="form-errors">{{ password_form.non_field_errors }}</div>
+          {% endif %}
+          <button type="submit" class="btn btn--primary btn--full">Sign in</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

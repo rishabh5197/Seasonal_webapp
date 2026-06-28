@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}{{ site_name }} | Shop{% endblock %}
+{% block content %}
+<section class="section page-hero">
+  <div class="container page-hero__inner glass-card">
+    <div>
+      <p class="eyebrow">Shop</p>
+      <h1>Modern filters, search, rating, and price sorting.</h1>
+      <p>Every filter here is backed by the database, so the UI responds to real catalog data instead of fixed demo values.</p>
+    </div>
+    <div class="filter-chips">
+      {% for band in bands %}
+      <span>{{ band.label }}</span>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container shop-layout">
+    <aside class="filters-panel glass-card">
+      <form method="get" class="filters-form">
+        <h3>Filters</h3>
+
+        <label class="field-label">
+          <span>Sort</span>
+          <select name="sort">
+            <option value="featured" {% if sort == "featured" %}selected{% endif %}>Featured</option>
+            <option value="popular" {% if sort == "popular" %}selected{% endif %}>Popularity</option>
+            <option value="newest" {% if sort == "newest" %}selected{% endif %}>Newest</option>
+            <option value="price_asc" {% if sort == "price_asc" %}selected{% endif %}>Price low to high</option>
+            <option value="price_desc" {% if sort == "price_desc" %}selected{% endif %}>Price high to low</option>
+            <option value="rating" {% if sort == "rating" %}selected{% endif %}>Top rated</option>
+          </select>
+        </label>
+
+        <label class="field-label">
+          <span>Search</span>
+          <input type="search" name="q" value="{{ active_filters.q }}" placeholder="Search products">
+        </label>
+
+        <label class="field-label">
+          <span>Category</span>
+          <select name="category">
+            <option value="">All categories</option>
+            {% for category in categories %}
+            <option value="{{ category.slug }}" {% if active_filters.category == category.slug %}selected{% endif %}>{{ category.name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label class="field-label">
+          <span>Brand</span>
+          <select name="brand">
+            <option value="">All brands</option>
+            {% for slug, name in brands %}
+            <option value="{{ slug }}" {% if active_filters.brand == slug %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <div class="field-row">
+          <label class="field-label">
+            <span>Min price</span>
+            <input type="number" name="min_price" value="{{ active_filters.min_price }}" min="0">
+          </label>
+          <label class="field-label">
+            <span>Max price</span>
+            <input type="number" name="max_price" value="{{ active_filters.max_price }}" min="0">
+          </label>
+        </div>
+
+        <label class="field-label">
+          <span>Min rating</span>
+          <select name="min_rating">
+            <option value="">Any</option>
+            <option value="4" {% if active_filters.min_rating == "4" %}selected{% endif %}>4+ stars</option>
+            <option value="4.5" {% if active_filters.min_rating == "4.5" %}selected{% endif %}>4.5+ stars</option>
+          </select>
+        </label>
+
+        <label class="checkbox-pill">
+          <input type="checkbox" name="in_stock" value="1" {% if active_filters.in_stock == "1" %}checked{% endif %}>
+          <span>In stock only</span>
+        </label>
+
+        <button class="btn btn--primary btn--full" type="submit">Apply filters</button>
+      </form>
+    </aside>
+
+    <div class="product-grid">
+      {% for product in products %}
+      <article class="product-card">
+        <div class="product-card__image">
+          {% with primary=product.images.first %}
+            {% if primary and primary.image %}
+            <img src="{{ primary.image.url }}" alt="{{ product.name }}">
+            {% else %}
+            <div class="image-placeholder"></div>
+            {% endif %}
+          {% endwith %}
+          <span class="product-card__badge">{{ product.category.name }}</span>
+        </div>
+        <div class="product-card__body">
+          <p class="product-card__meta">{{ product.brand.name|default:"No brand" }}</p>
+          <h3>{{ product.name }}</h3>
+          <div class="rating">
+            <span>&#9733; {{ product.average_rating|default:"0" }}</span>
+            <small>({{ product.approved_reviews|default:"0" }})</small>
+          </div>
+          <div class="price-row">
+            <strong>&#8377;{{ product.current_price }}</strong>
+            <del>&#8377;{{ product.base_price }}</del>
+          </div>
+          <div class="card-meta-row">
+            <span>{{ product.stock_quantity }} in stock</span>
+            <span>Seller: {{ product.owner.full_name }}</span>
+          </div>
+          <a class="btn btn--small" href="{% url 'product-detail' product.slug %}">Open product</a>
+        </div>
+      </article>
+      {% empty %}
+      <div class="glass-card empty-state">
+        <h3>No matching products</h3>
+        <p>Try adjusting the filters or ask the admin to add products in Django admin.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

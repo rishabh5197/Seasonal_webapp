@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}{{ site_name }} | Verify OTP{% endblock %}
+{% block content %}
+<section class="section auth-section">
+  <div class="container auth-shell">
+    <div class="auth-copy">
+      <p class="eyebrow">Verify OTP</p>
+      <h1>Enter the code we sent to your contact route</h1>
+      <p>Codes expire quickly, so use the one-time code before it times out. If you did not receive it, you can request a fresh code after 30 seconds.</p>
+    </div>
+
+    <div class="auth-card glass-card">
+      <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.token }}
+        <label class="field-label">
+          <span>OTP code</span>
+          {{ form.code }}
+        </label>
+        {% if form.non_field_errors %}
+          <div class="form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+        {% if form.code.errors %}
+          <div class="form-errors">{{ form.code.errors }}</div>
+        {% endif %}
+        <button type="submit" class="btn btn--primary btn--full">Verify and sign in</button>
+        <div class="auth-links auth-links--stacked">
+          <a
+            href="{% url 'site_auth:otp-login' %}?mode=otp"
+            class="resend-link{% if resend_wait_seconds > 0 %} is-disabled{% endif %}"
+            {% if resend_wait_seconds > 0 %}aria-disabled="true" data-resend-seconds="{{ resend_wait_seconds }}"{% endif %}
+          >
+            {% if resend_wait_seconds > 0 %}
+              Request again in <span data-resend-countdown>{{ resend_wait_seconds }}</span>s
+            {% else %}
+              Didn't get it? Request another OTP
+            {% endif %}
+          </a>
+          <span class="field-hint">The next OTP will go to {{ pending_identifier }} using the same login route.</span>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}
